@@ -1,1 +1,2 @@
-# nt-to-sql-capstone
+# renuka.chitmalwar
+Capstone projects for renuka.chitmalwar@neuleap.ai

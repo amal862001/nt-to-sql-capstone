@@ -1,0 +1,59 @@
+version: "3.8"
+ 
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: postgres_db
+ 
+    env_file:
+      - .env
+ 
+    environment:
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+ 
+    ports:
+      - "${DB_PORT}:5432"
+ 
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - .:/docker-entrypoint-initdb.d 
+ 
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+ 
+    networks:
+      - app_network
+ 
+  app:
+    build: .
+    container_name: app
+ 
+    depends_on:
+      postgres:
+        condition: service_healthy
+ 
+    env_file:
+      - .env
+ 
+    ports:
+      - "8501:8501"
+ 
+    volumes:
+      - .:/app
+ 
+    networks:
+      - app_network
+ 
+    command: streamlit run app.py --server.address=0.0.0.0 --server.port=8501
+ 
+volumes:
+  postgres_data:
+ 
+networks:
+  app_network:
+    driver: bridge
